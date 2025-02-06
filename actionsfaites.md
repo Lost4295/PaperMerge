@@ -6,4 +6,15 @@ Membres du groupe :
 Ylan Turin--Kondi
 
 
-Actions faites : 
+Infos :
+
+Un deployment est nécessaire pour tout
+
+### Actions faites : 
+
+Base de données
+Stockage clé-valeur (Redis)
+Stockage d'objet (Minio)
+Worker S3 Papermerge
+Worker OCR Papermerge
+Application Papermerge

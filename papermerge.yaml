@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: 
+  template:
+    metadata:
+      labels:
+        name: 
+    spec:
+      containers:
+        - name: 
+          image: papermerge/papermerge:3.3.1
+          ports:
+            - containerPort: 80
+          env:
+            - data
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermerge_loadbalancer
+spec:
+  selector:
+    name: papermerge
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 80
+  type: LoadBalancer

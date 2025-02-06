@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: 
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: 
+  template:
+    metadata:
+      labels:
+        name: 
+    spec:
+      containers:
+        - name: workerOCR
+          image: papermerge/ocrworker:0.3.1
+          env:
+            - data
+
+--- 
+apiVersion: v1
+kind: Service
+metadata:
+  name: _service
+spec:
+  selector:
+    name: 
+  ports:
+    - protocol: TCP
+      port: 
+      targetPort: 

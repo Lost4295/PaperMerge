@@ -1,35 +1,78 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: minio_deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: 
+      app: minio 
   template:
     metadata:
       labels:
-        name: 
+        app: minio 
     spec:
       containers:
-        - name: 
+        - name: minio
           image: minio/minio:latest
           ports:
             - containerPort: 9000
             - containerPort: 9001
+          command: ["server", "--address", ":9001", "/data"]
           env:
-            - data
+            - name: MINIO_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: minio-secret
+                  key: MINIO_ROOT_PASSWORD
+          volumeMounts:
+            - name: minio-storage
+              mountPath: /data
+      volumes:
+        - name: minio-storage
+          persistentVolumeClaim:
+            claimName: minio-pvc
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-secret
+type: Opaque
+data:
+  MINIO_ROOT_USER: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU= 
+  MINIO_ROOT_PASSWORD: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=
 
 --- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: _service
+  name: minio_service
 spec:
   selector:
-    name: 
+    app: minio 
   ports:
     - protocol: TCP
-      port: 
-      targetPort: 
+      port: 9001
+      targetPort: 9001 
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+  type: LoadBalancer
+
+--- 
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

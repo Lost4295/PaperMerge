@@ -12,9 +12,9 @@ Un deployment est nécessaire pour tout
 
 ### Actions faites : 
 
-Base de données
-Stockage clé-valeur (Redis)
-Stockage d'objet (Minio)
+Base de données -> Ylan
+Stockage clé-valeur (Redis) -> Ylan
+Stockage d'objet (Minio) -> Ylan
 Worker S3 Papermerge
 Worker OCR Papermerge
 Application Papermerge

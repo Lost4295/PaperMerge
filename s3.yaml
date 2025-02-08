@@ -1,32 +1,67 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: worker-s3-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: 
+      name: worker-s3
   template:
     metadata:
       labels:
-        name: 
+        name: worker-s3
     spec:
       containers:
-        - name: workerS3
+        - name: worker-s3
           image:  papermerge/s3worker:0.4.3
           env:
-            - data
+            - name: AWS-ACCESS-KEY-ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: AWS-ACCESS-KEY-ID
+            - name: AWS-SECRET-ACCESS-KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: AWS-SECRET-ACCESS-KEY
+            - name: AWS-REGION-NAME
+              value: us-east-1
+            - name: PAPERMERGE-DATABASE-URL
+              value: postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge
+            - name: PAPERMERGE-REDIS-URL
+              value: redis://papermerge-redis:6379/0
+            - name: PAPERMERGE-s3-BUCKET-NAME
+              value: papermerge
+            - name: OCR-WORKER-ARGS
+              value: "-Q ocr -c 2"
+          volumeMounts:
+            - name: s3-storage
+              mountPath: /var/media/pmg
+      volumes:
+        - name: s3-storage
+          persistentVolumeClaim:
+            claimName: s3-pvc
 
---- 
+---
 apiVersion: v1
-kind: Service
+kind: PersistentVolumeClaim
 metadata:
-  name: _service
+  name: s3-pvc
 spec:
-  selector:
-    name: 
-  ports:
-    - protocol: TCP
-      port: 
-      targetPort: 
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-secret
+type: Opaque
+data:
+  AWS-ACCESS-KEY-ID: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU=
+  AWS-SECRET-ACCESS-KEY: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=

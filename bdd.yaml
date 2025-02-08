@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres_deployment
+  name: postgres-deployment
 spec:
   replicas: 1
   selector:
@@ -18,21 +18,21 @@ spec:
           ports:
             - containerPort: 5432
           env:
-            - name: POSTGRES_PASSWORD
+            - name: POSTGRES-PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres_secret
-                  key: POSTGRES_PASSWORD
-            - name: POSTGRES_USER
+                  name: postgres-secret
+                  key: POSTGRES-PASSWORD
+            - name: POSTGRES-USER
               valueFrom:
                 configMapKeyRef:
-                  name: postgres_config
-                  key: POSTGRES_USER
-            - name: POSTGRES_DB
+                  name: postgres-config
+                  key: POSTGRES-USER
+            - name: POSTGRES-DB
               valueFrom:
                 configMapKeyRef:
-                  name: postgres_config
-                  key: POSTGRES_DB
+                  name: postgres-config
+                  key: POSTGRES-DB
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres_service
+  name: postgres-service
 spec:
   selector:
     app: postgres
@@ -70,16 +70,16 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres_secret
+  name: postgres-secret
 type: Opaque
 data:
-  POSTGRES_PASSWORD: cG1nLXNlY3JldA==
+  POSTGRES-PASSWORD: cG1nLXNlY3JldA==
 
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: postgres_config
+  name: postgres-config
 data:
-  POSTGRES_USER: papermerge
-  POSTGRES_DB: papermerge
+  POSTGRES-USER: papermerge
+  POSTGRES-DB: papermerge

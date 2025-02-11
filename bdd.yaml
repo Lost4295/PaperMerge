@@ -18,21 +18,21 @@ spec:
           ports:
             - containerPort: 5432
           env:
-            - name: POSTGRES-PASSWORD
+            - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: postgres-secret
-                  key: POSTGRES-PASSWORD
-            - name: POSTGRES-USER
+                  key: POSTGRES_PASSWORD
+            - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
                   name: postgres-config
-                  key: POSTGRES-USER
-            - name: POSTGRES-DB
+                  key: POSTGRES_USER
+            - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
                   name: postgres-config
-                  key: POSTGRES-DB
+                  key: POSTGRES_DB
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-service
+  name: papermerge-database
 spec:
   selector:
     app: postgres
@@ -73,7 +73,7 @@ metadata:
   name: postgres-secret
 type: Opaque
 data:
-  POSTGRES-PASSWORD: cG1nLXNlY3JldA==
+  POSTGRES_PASSWORD: cG1nLXNlY3JldA==
 
 ---
 apiVersion: v1
@@ -81,5 +81,5 @@ kind: ConfigMap
 metadata:
   name: postgres-config
 data:
-  POSTGRES-USER: papermerge
-  POSTGRES-DB: papermerge
+  POSTGRES_USER: papermerge
+  POSTGRES_DB: papermerge

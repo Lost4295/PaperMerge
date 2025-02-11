@@ -33,3 +33,11 @@ This project focuses on advanced containerization techniques using Kubernetes. I
 2. **Deploy Applications**: Use the `kubectl apply` command to deploy your applications using Kubernetes YAML configuration files.
 3. **Manage Services**: Forward local ports to services running in your cluster to access them from your local machine.
 4. **Monitor Pods**: Continuously monitor the status of your pods to ensure they are running as expected.
+
+### Contributors
+
+This project was a collaborative effort. Below is a list of contributors and their respective roles:
+
+- **Ylan Torin-Kondi**: PosgressSql & Redis
+- **Mathias Collas-Jourdan**: Minio & WorkerS3
+- **Alexandre De Trindade**: Ocr & papermerge

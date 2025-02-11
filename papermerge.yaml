@@ -1,36 +1,85 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: papermerge-deployment
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: 
+      app: papermerge
   template:
     metadata:
       labels:
-        name: 
+        app: papermerge
     spec:
       containers:
-        - name: 
+        - name: papermerge
           image: papermerge/papermerge:3.3.1
           ports:
             - containerPort: 80
           env:
-            - data
-
+            - name: PAPERMERGE__AUTH__USERNAME
+              value: admin
+            - name: PAPERMERGE__AUTH__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: papermerge-secret
+                  key: PAPERMERGE__AUTH__PASSWORD
+            - name: PAPERMERGE__DATABASE__URL
+              value: postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge
+            - name: PAPERMERGE__MAIN__MEDIA_ROOT
+              value: /var/media/pmg
+            - name: PAPERMERGE__OCR__LANGUAGE
+              value: "eng,fra"
+            - name: PAPERMERGE__OCR__DEFAULT_LANGUAGE
+              value: eng
+            - name: PAPERMERGE__REDIS__URL
+              value: redis://papermerge-redis:6379/0
+            - name: PAPERMERGE__SECURITY__SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: papermerge-secret
+                  key: PAPERMERGE__SECURITY__SECRET_KEY
+          volumeMounts:
+            - name: papermerge-storage
+              mountPath: /var/media/pmg
+      volumes:
+        - name: papermerge-storage
+          persistentVolumeClaim:
+            claimName: papermerge-pvc
 
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: papermerge_loadbalancer
+  name: papermerge-application
 spec:
   selector:
-    name: papermerge
+    app: papermerge
   ports:
     - protocol: TCP
-      port: 9090
+      port: 80
       targetPort: 80
   type: LoadBalancer
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: papermerge-secret
+type: Opaque
+data:
+  PAPERMERGE__AUTH__PASSWORD: c2VjcmV0
+  PAPERMERGE__SECURITY__SECRET_KEY: OGFhOTEyN2U5MDQzMjRlMWQ5M2MyYjY4NDgzYTMyN2MzYjViZTk2NGRkMTYxZTNlNGRmOGRiY2EwNDQzZWMyMQ==
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: papermerge-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

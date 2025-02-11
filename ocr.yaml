@@ -1,32 +1,51 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: worker-ocr-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      name: 
+      app: worker-ocr
   template:
     metadata:
       labels:
-        name: 
+        app: worker-ocr
     spec:
       containers:
-        - name: workerOCR
+        - name: worker-ocr
           image: papermerge/ocrworker:0.3.1
           env:
-            - data
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: ocr-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ocr-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_REGION_NAME
+              value: us-east-1
+            - name: AWS_S3_ENDPOINT
+              value: http://paperless-minio:9000
+            - name: PAPERMERGE__DATABASE__URL
+              value: postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge
+            - name: PAPERMERGE__REDIS__URL
+              value: redis://papermerge-redis:6379/0
+            - name: PAPERMERGE__S3__BUCKET_NAME
+              value: papermerge
+            - name: OCR_WORKER_ARGS
+              value: "-Q ocr -c 2"
 
---- 
+---
+
 apiVersion: v1
-kind: Service
+kind: Secret
 metadata:
-  name: _service
-spec:
-  selector:
-    name: 
-  ports:
-    - protocol: TCP
-      port: 
-      targetPort: 
+  name: ocr-secret
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU= 
+  AWS_SECRET_ACCESS_KEY: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=

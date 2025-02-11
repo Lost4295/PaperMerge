@@ -16,20 +16,20 @@ spec:
         - name: minio
           image: minio/minio:latest
           ports:
-            - containerPort: 9000
-            - containerPort: 9001
-          command: ["server", "--address", ":9001", "/data"]
+            - containerPort: 9000  # API
+            - containerPort: 9001  # Console
+          command: ["minio", "server", "--console-address", ":9001", "/data"]
           env:
-            - name: MINIO-ROOT-USER
+            - name: MINIO_ROOT_USER
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
-                  key: MINIO-ROOT-USER
-            - name: MINIO-ROOT-PASSWORD
+                  key: MINIO_ROOT_USER
+            - name: MINIO_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: minio-secret
-                  key: MINIO-ROOT-PASSWORD
+                  key: MINIO_ROOT_PASSWORD
           volumeMounts:
             - name: minio-storage
               mountPath: /data
@@ -44,27 +44,27 @@ metadata:
   name: minio-secret
 type: Opaque
 data:
-  MINIO-ROOT-USER: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU= 
-  MINIO-ROOT-PASSWORD: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=
+  MINIO_ROOT_USER: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU= 
+  MINIO_ROOT_PASSWORD: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=
 
 --- 
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio-service
+  name: paperless-minio
 spec:
+  type: LoadBalancer
   selector:
     app: minio 
   ports:
     - protocol: TCP
-      name: minio-tcp-1
-      port: 9001
-      targetPort: 9001 
-    - protocol: TCP
-      name: minio-tcp-2
+      name: minio-tcp-api
       port: 9000
       targetPort: 9000
-  type: LoadBalancer
+    - protocol: TCP
+      name: minio-tcp-console
+      port: 9001
+      targetPort: 9001
 
 --- 
 
@@ -78,3 +78,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+# kubectl get svc paperless-minio

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: postgres_deployment
+  name: postgres-deployment
 spec:
   replicas: 1
   selector:
@@ -21,17 +21,17 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: postgres_secret
+                  name: postgres-secret
                   key: POSTGRES_PASSWORD
             - name: POSTGRES_USER
               valueFrom:
                 configMapKeyRef:
-                  name: postgres_config
+                  name: postgres-config
                   key: POSTGRES_USER
             - name: POSTGRES_DB
               valueFrom:
                 configMapKeyRef:
-                  name: postgres_config
+                  name: postgres-config
                   key: POSTGRES_DB
           volumeMounts:
             - name: postgres-storage
@@ -57,7 +57,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres_service
+  name: papermerge-database
 spec:
   selector:
     app: postgres
@@ -70,7 +70,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres_secret
+  name: postgres-secret
 type: Opaque
 data:
   POSTGRES_PASSWORD: cG1nLXNlY3JldA==
@@ -79,7 +79,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: postgres_config
+  name: postgres-config
 data:
   POSTGRES_USER: papermerge
   POSTGRES_DB: papermerge

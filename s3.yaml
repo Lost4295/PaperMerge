@@ -1,32 +1,72 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: 
+  name: worker-s3-deployment
 spec:
-  replicas: 1
+  replicas: 2
   selector:
     matchLabels:
-      name: 
+      app: worker-s3
   template:
     metadata:
       labels:
-        name: 
+        app: worker-s3
     spec:
       containers:
-        - name: workerS3
-          image:  papermerge/s3worker:0.4.3
+        - name: worker-s3
+          image: papermerge/s3worker:0.4.3
           env:
-            - data
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-secret
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_REGION_NAME
+              value: us-east-1
+            - name: AWS_S3_ENDPOINT
+              value:  
+            - name: PAPERMERGE__DATABASE__URL
+              value: postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge
+            - name: PAPERMERGE__MAIN__MEDIA_ROOT
+              value: /var/media/pmg
+            - name: PAPERMERGE__REDIS__URL
+              value: redis://papermerge-redis:6379/0
+            - name: PAPERMERGE__S3__BUCKET_NAME
+              value: papermerge
+            - name: S3_WORKER_ARGS
+              value: "-Q s3,s3preview -c 2"
+          volumeMounts:
+            - name: s3-storage
+              mountPath: /var/media/pmg
+      restartPolicy: Always
+      volumes:
+        - name: s3-storage
+          persistentVolumeClaim:
+            claimName: s3-pvc
 
---- 
+---
 apiVersion: v1
-kind: Service
+kind: PersistentVolumeClaim
 metadata:
-  name: _service
+  name: s3-pvc
 spec:
-  selector:
-    name: 
-  ports:
-    - protocol: TCP
-      port: 
-      targetPort: 
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-secret
+type: Opaque
+data:
+  AWS_ACCESS_KEY_ID: MmU4ODE3MjY2MjYxNjEwODEwNTk2YTUwYjhmNGE4YzU=
+  AWS_SECRET_ACCESS_KEY: YTUwMzA3MWRlYmZhM2FjMGMxZGUxY2Q3OWY=

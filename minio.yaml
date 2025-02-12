@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: minio_deployment
+  name: minio-deployment
 spec:
   replicas: 1
   selector:
@@ -16,9 +16,9 @@ spec:
         - name: minio
           image: minio/minio:latest
           ports:
-            - containerPort: 9000
-            - containerPort: 9001
-          command: ["server", "--address", ":9001", "/data"]
+            - containerPort: 9000  # API
+            - containerPort: 9001  # Console
+          command: ["minio", "server", "--console-address", ":9001", "/data"]
           env:
             - name: MINIO_ROOT_USER
               valueFrom:
@@ -51,18 +51,20 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio_service
+  name: paperless-minio
 spec:
+  type: LoadBalancer
   selector:
     app: minio 
   ports:
     - protocol: TCP
-      port: 9001
-      targetPort: 9001 
-    - protocol: TCP
+      name: minio-tcp-api
       port: 9000
       targetPort: 9000
-  type: LoadBalancer
+    - protocol: TCP
+      name: minio-tcp-console
+      port: 9001
+      targetPort: 9001
 
 --- 
 
@@ -76,3 +78,5 @@ spec:
   resources:
     requests:
       storage: 1Gi
+
+# kubectl get svc paperless-minio

@@ -15,6 +15,13 @@ kubectl apply -f fileName.yaml
 # Continuously watch the status of pods
 # This command will refresh the status of your pods every second.
 watch -n 1 kubectl get pod
+
+minikube ip
+
+http://<minikube-ip>:30001
+
+admin
+secret
 ```
 
 ### Project Overview
